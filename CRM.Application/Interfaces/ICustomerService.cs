@@ -7,4 +7,5 @@ public interface ICustomerService
     Task<List<CustomerListDto>> GetAllAsync();
 
     Task<List<CustomerListDto>> SearchAsync(string search);
+    Task CreateAsync(CreateCustomerDto dto);
 }

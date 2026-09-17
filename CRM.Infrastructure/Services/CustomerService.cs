@@ -67,4 +67,25 @@ public class CustomerService : ICustomerService
             })
             .ToListAsync();
     }
+    public async Task CreateAsync(CreateCustomerDto dto)
+    {
+        var customer = new Customer
+        {
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            NationalCode = dto.NationalCode,
+            Mobile = dto.Mobile,
+            Phone = dto.Phone,
+            Email = dto.Email,
+            Address = dto.Address,
+            CompanyId = dto.CompanyId,
+            AssignedUserId = dto.AssignedUserId,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Customers.Add(customer);
+
+        await _context.SaveChangesAsync();
+    }
 }

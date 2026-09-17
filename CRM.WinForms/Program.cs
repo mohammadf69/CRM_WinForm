@@ -1,17 +1,46 @@
-namespace CRM.WinForms
+using CRM.Application.Interfaces;
+using CRM.Infrastructure.Data;
+using CRM.Infrastructure.Services;
+using CRM.WinForms.Forms.Customers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace CRM.WinForms;
+
+internal static class Program
 {
-    public static class Program
+    [STAThread]
+    static void Main()
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
-        {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-            System.Windows.Forms.Application.Run(new Form1());
-        }
+       
+
+        var builder = Host.CreateApplicationBuilder();
+
+        builder.Configuration.AddJsonFile(
+            "appsettings.json",
+            optional: false,
+            reloadOnChange: true);
+
+        var connectionString =
+            builder.Configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException(
+                "Connection string 'DefaultConnection' not found.");
+
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer(connectionString));
+
+        builder.Services.AddScoped<ICustomerService, CustomerService>();
+        builder.Services.AddTransient<CustomerListForm>();
+        builder.Services.AddTransient<CustomerEditForm>();
+        builder.Services.AddTransient<Form1>();
+
+        using var host = builder.Build();
+
+        var mainForm = host.Services.GetRequiredService<Form1>();
+
+        System.Windows.Forms.Application.Run(mainForm);
     }
 }
