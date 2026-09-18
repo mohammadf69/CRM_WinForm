@@ -16,10 +16,12 @@ namespace CRM.WinForms.Forms.Customers
     public partial class CustomerEditForm : Form
     {
         private readonly ICustomerService _customerService;
-        public CustomerEditForm(ICustomerService customerService)
+        private readonly int? _customerId;
+        public CustomerEditForm(ICustomerService customerService, int? customerId = null)
         {
             InitializeComponent();
             _customerService = customerService;
+            _customerId = customerId;
         }
         private string CheckIFnullValeu()
         {
@@ -50,28 +52,43 @@ namespace CRM.WinForms.Forms.Customers
 
         private async void btnSave_Click(object sender, EventArgs e)
         {
-            if (CheckIFnullValeu != null)
+            if (CheckIFnullValeu() == "")
             {
-                var dto = new CreateCustomerDto
-                {
-                    FirstName = txtFirstName.Text.Trim(),
-                    LastName = txtLastName.Text.Trim(),
-                    NationalCode = txtNationalCode.Text.Trim(),
-                    Mobile = txtMobile.Text.Trim(),
-                    Phone = txtPhone.Text.Trim(),
-                    Email = txtEmail.Text.Trim(),
-                    Address = txtAddress.Text.Trim()
-                };
-
                 try
                 {
-                    await _customerService.CreateAsync(dto);
+                    if (_customerId is null)
+                    {
+                        var dto = new CreateCustomerDto
+                        {
+                            FirstName = txtFirstName.Text.Trim(),
+                            LastName = txtLastName.Text.Trim(),
+                            NationalCode = txtNationalCode.Text.Trim(),
+                            Mobile = txtMobile.Text.Trim(),
+                            Phone = txtPhone.Text.Trim(),
+                            Email = txtEmail.Text.Trim(),
+                            Address = txtAddress.Text.Trim(),
+                            IsActive = true
+                        };
 
-                    MessageBox.Show(
-                        "اطلاعات مشتری با موفقیت ذخیره شد",
-                        "Success",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
+                        await _customerService.CreateAsync(dto);
+                    }
+                    else
+                    {
+                        var dto = new UpdateCustomerDto
+                        {
+                            Id = _customerId.Value,
+                            FirstName = txtFirstName.Text.Trim(),
+                            LastName = txtLastName.Text.Trim(),
+                            NationalCode = txtNationalCode.Text.Trim(),
+                            Mobile = txtMobile.Text.Trim(),
+                            Phone = txtPhone.Text.Trim(),
+                            Email = txtEmail.Text.Trim(),
+                            Address = txtAddress.Text.Trim(),
+                            IsActive = chkIsActive.Checked
+                        };
+
+                        await _customerService.UpdateAsync(dto);
+                    }
 
                     DialogResult = DialogResult.OK;
                 }
@@ -83,22 +100,38 @@ namespace CRM.WinForms.Forms.Customers
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error);
                 }
-            }
-            else
-            {
-                MessageBox.Show(CheckIFnullValeu()
-                       ,
-                       "لطفا اطلاعات را وارد نمایید",
-                       MessageBoxButtons.OK,
-                       MessageBoxIcon.Error);
-            }
 
-
+            }
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+        }
+
+        private async void CustomerEditForm_Load(object sender, EventArgs e)
+        {
+            if (_customerId is null)
+                return;
+
+            var customer =
+                await _customerService.GetByIdAsync(_customerId.Value);
+
+            if (customer is null)
+            {
+                MessageBox.Show("Customer not found.");
+                DialogResult = DialogResult.Cancel;
+                return;
+            }
+
+            txtFirstName.Text = customer.FirstName;
+            txtLastName.Text = customer.LastName;
+            txtNationalCode.Text = customer.NationalCode;
+            txtMobile.Text = customer.Mobile;
+            txtPhone.Text = customer.Phone;
+            txtEmail.Text = customer.Email;
+            txtAddress.Text = customer.Address;
+            chkIsActive.Checked = customer.IsActive;
         }
     }
 }

@@ -8,4 +8,9 @@ public interface ICustomerService
 
     Task<List<CustomerListDto>> SearchAsync(string search);
     Task CreateAsync(CreateCustomerDto dto);
+    Task<CustomerEditDto?> GetByIdAsync(int id);
+
+    Task UpdateAsync(UpdateCustomerDto dto);
+
+    Task DeleteAsync(int id);
 }

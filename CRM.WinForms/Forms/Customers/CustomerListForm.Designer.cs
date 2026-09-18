@@ -51,17 +51,19 @@
             panel1.Controls.Add(txtSearch);
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
+            panel1.Margin = new Padding(3, 2, 3, 2);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1136, 51);
+            panel1.Size = new Size(994, 38);
             panel1.TabIndex = 0;
             // 
             // btnNew
             // 
             btnNew.Image = (Image)resources.GetObject("btnNew.Image");
             btnNew.ImageAlign = ContentAlignment.MiddleLeft;
-            btnNew.Location = new Point(1051, 12);
+            btnNew.Location = new Point(921, 7);
+            btnNew.Margin = new Padding(3, 2, 3, 2);
             btnNew.Name = "btnNew";
-            btnNew.Size = new Size(73, 29);
+            btnNew.Size = new Size(64, 29);
             btnNew.TabIndex = 1;
             btnNew.Text = "جدید";
             btnNew.TextAlign = ContentAlignment.MiddleRight;
@@ -72,33 +74,38 @@
             // 
             btnEdit.Image = Properties.Resources.edi24t;
             btnEdit.ImageAlign = ContentAlignment.MiddleLeft;
-            btnEdit.Location = new Point(965, 10);
+            btnEdit.Location = new Point(845, 6);
+            btnEdit.Margin = new Padding(3, 2, 3, 2);
             btnEdit.Name = "btnEdit";
-            btnEdit.Size = new Size(80, 29);
+            btnEdit.Size = new Size(70, 30);
             btnEdit.TabIndex = 1;
             btnEdit.Text = "ویرایش";
             btnEdit.TextAlign = ContentAlignment.MiddleRight;
             btnEdit.UseVisualStyleBackColor = true;
+            btnEdit.Click += btnEdit_Click;
             // 
             // btnDelete
             // 
             btnDelete.Image = (Image)resources.GetObject("btnDelete.Image");
             btnDelete.ImageAlign = ContentAlignment.MiddleLeft;
-            btnDelete.Location = new Point(865, 10);
+            btnDelete.Location = new Point(757, 8);
+            btnDelete.Margin = new Padding(3, 2, 3, 2);
             btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(94, 29);
+            btnDelete.Size = new Size(82, 28);
             btnDelete.TabIndex = 1;
             btnDelete.Text = "حذف";
             btnDelete.TextAlign = ContentAlignment.MiddleRight;
             btnDelete.UseVisualStyleBackColor = true;
+            btnDelete.Click += btnDelete_Click;
             // 
             // btnSearch
             // 
             btnSearch.Image = Properties.Resources._001_39;
             btnSearch.ImageAlign = ContentAlignment.MiddleLeft;
-            btnSearch.Location = new Point(10, 10);
+            btnSearch.Location = new Point(9, 6);
+            btnSearch.Margin = new Padding(3, 2, 3, 2);
             btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(94, 29);
+            btnSearch.Size = new Size(82, 28);
             btnSearch.TabIndex = 1;
             btnSearch.Text = "جستجو";
             btnSearch.TextAlign = ContentAlignment.MiddleRight;
@@ -108,18 +115,20 @@
             // txtSearch
             // 
             txtSearch.BorderStyle = BorderStyle.FixedSingle;
-            txtSearch.Location = new Point(110, 12);
+            txtSearch.Location = new Point(96, 9);
+            txtSearch.Margin = new Padding(3, 2, 3, 2);
             txtSearch.Name = "txtSearch";
-            txtSearch.Size = new Size(125, 27);
+            txtSearch.Size = new Size(110, 23);
             txtSearch.TabIndex = 0;
             // 
             // panel2
             // 
             panel2.Controls.Add(dgvCustomers);
             panel2.Dock = DockStyle.Fill;
-            panel2.Location = new Point(0, 51);
+            panel2.Location = new Point(0, 38);
+            panel2.Margin = new Padding(3, 2, 3, 2);
             panel2.Name = "panel2";
-            panel2.Size = new Size(1136, 618);
+            panel2.Size = new Size(994, 464);
             panel2.TabIndex = 1;
             // 
             // dgvCustomers
@@ -127,18 +136,21 @@
             dgvCustomers.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvCustomers.Dock = DockStyle.Fill;
             dgvCustomers.Location = new Point(0, 0);
+            dgvCustomers.Margin = new Padding(3, 2, 3, 2);
             dgvCustomers.Name = "dgvCustomers";
             dgvCustomers.RowHeadersWidth = 51;
-            dgvCustomers.Size = new Size(1136, 618);
+            dgvCustomers.Size = new Size(994, 464);
             dgvCustomers.TabIndex = 0;
+            dgvCustomers.CellEnter += dgvCustomers_CellEnter;
             // 
             // CustomerListForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1136, 669);
+            ClientSize = new Size(994, 502);
             Controls.Add(panel2);
             Controls.Add(panel1);
+            Margin = new Padding(3, 2, 3, 2);
             Name = "CustomerListForm";
             Text = "ثبت و نمایش  مشتریان";
             Load += CustomerListForm_Load;

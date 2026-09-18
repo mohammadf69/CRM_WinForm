@@ -88,4 +88,60 @@ public class CustomerService : ICustomerService
 
         await _context.SaveChangesAsync();
     }
+
+    public async Task<CustomerEditDto?> GetByIdAsync(int id)
+    {
+        return await _context.Customers
+            .AsNoTracking()
+            .Where(x => x.Id == id)
+            .Select(x => new CustomerEditDto
+            {
+                Id = x.Id,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
+                NationalCode = x.NationalCode,
+                Mobile = x.Mobile,
+                Phone = x.Phone,
+                Email = x.Email,
+                Address = x.Address,
+                CompanyId = x.CompanyId,
+                AssignedUserId = x.AssignedUserId,
+                IsActive = x.IsActive
+            })
+            .FirstOrDefaultAsync();
+    }
+    public async Task UpdateAsync(UpdateCustomerDto dto)
+    {
+        var customer = await _context.Customers
+            .FirstOrDefaultAsync(x => x.Id == dto.Id);
+
+        if (customer is null)
+            throw new KeyNotFoundException("مشتری مورد نظر موجود  نمی باشد");
+
+        customer.FirstName = dto.FirstName;
+        customer.LastName = dto.LastName;
+        customer.NationalCode = dto.NationalCode;
+        customer.Mobile = dto.Mobile;
+        customer.Phone = dto.Phone;
+        customer.Email = dto.Email;
+        customer.Address = dto.Address;
+        customer.CompanyId = dto.CompanyId;
+        customer.AssignedUserId = dto.AssignedUserId;
+        customer.IsActive = dto.IsActive;
+        customer.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+    }
+    public async Task DeleteAsync(int id)
+    {
+        var customer = await _context.Customers
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (customer is null)
+            throw new KeyNotFoundException("مشتری مورد نظر موجود  نمی باشد");
+
+        _context.Customers.Remove(customer);
+
+        await _context.SaveChangesAsync();
+    }
 }

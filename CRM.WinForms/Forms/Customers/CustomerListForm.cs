@@ -16,6 +16,7 @@ namespace CRM.WinForms.Forms.Customers
     {
         private readonly ICustomerService _customerService;
         private readonly IServiceProvider _serviceProvider;
+        private int customerId;
         public CustomerListForm(ICustomerService customerService, IServiceProvider serviceProvider)
         {
             InitializeComponent();
@@ -74,12 +75,64 @@ namespace CRM.WinForms.Forms.Customers
 
         private async void btnNew_Click(object sender, EventArgs e)
         {
-            using var form = _serviceProvider
-                .GetRequiredService<CustomerEditForm>();
+            using var form = ActivatorUtilities.CreateInstance<CustomerEditForm>(_serviceProvider);
 
             if (form.ShowDialog(this) == DialogResult.OK)
             {
                 await LoadCustomersAsync();
+            }
+        }
+
+        private void btnEdit_Click(object sender, EventArgs e)
+        {
+            if (dgvCustomers.Rows.Count > 0)
+            {
+                customerId = (int)dgvCustomers.CurrentRow.Cells["Id"].Value;
+                using var form =
+                    ActivatorUtilities.CreateInstance<CustomerEditForm>(
+                        _serviceProvider,
+                        customerId);
+                form.ShowDialog(this);
+            }
+
+        }
+
+        private void dgvCustomers_CellEnter(object sender, DataGridViewCellEventArgs e)
+        {
+
+
+        }
+
+        private async void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (dgvCustomers.CurrentRow is null)
+                return;
+
+            var customerId =
+                (int)dgvCustomers.CurrentRow.Cells["Id"].Value;
+
+            var confirm = MessageBox.Show(
+                "آيا از حذف مشتری  مورد نظر  اطمینان دارید",
+                "تایید",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes)
+                return;
+
+            try
+            {
+                await _customerService.DeleteAsync(customerId);
+
+                await LoadCustomersAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
     }

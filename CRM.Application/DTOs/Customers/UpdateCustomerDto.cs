@@ -1,7 +1,9 @@
 ﻿namespace CRM.Application.DTOs.Customers;
 
-public class CreateCustomerDto
+public class UpdateCustomerDto
 {
+    public int Id { get; set; }
+
     public required string FirstName { get; set; }
 
     public required string LastName { get; set; }
@@ -19,5 +21,6 @@ public class CreateCustomerDto
     public int? CompanyId { get; set; }
 
     public int? AssignedUserId { get; set; }
-    public bool  IsActive { get; set; }
+
+    public bool IsActive { get; set; }
 }
