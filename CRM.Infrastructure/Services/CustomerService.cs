@@ -10,10 +10,12 @@ public class CustomerService : ICustomerService
 {
     private readonly AppDbContext _context;
     private readonly IValidator<CreateCustomerDto> _createValidator;
-    public CustomerService(AppDbContext context, IValidator<CreateCustomerDto> createValidator)
+    private readonly IValidator<UpdateCustomerDto> _updateValidator;
+    public CustomerService(AppDbContext context, IValidator<CreateCustomerDto> createValidator, IValidator<UpdateCustomerDto> upupdateValidator)
     {
         _context = context;
-        _createValidator =createValidator;
+        _createValidator = createValidator;
+        _updateValidator = upupdateValidator;
     }
 
     public async Task<List<CustomerListDto>> GetAllAsync()
@@ -71,6 +73,12 @@ public class CustomerService : ICustomerService
     }
     public async Task CreateAsync(CreateCustomerDto dto)
     {
+        var exists = await _context.Customers
+             .AnyAsync(x => x.NationalCode == dto.NationalCode);
+
+        if (exists)
+            throw new ValidationException(
+                "این کد ملی قبلاً ثبت شده است.");
         var validationResult =
             await _createValidator.ValidateAsync(dto);
 
@@ -126,16 +134,16 @@ public class CustomerService : ICustomerService
     }
     public async Task UpdateAsync(UpdateCustomerDto dto)
     {
-        //var validationResult =
-        //    await _createValidator.ValidateAsync(dto);
-        //if (!validationResult.IsValid)
-        //{
-        //    var errors = string.Join(
-        //        Environment.NewLine,
-        //        validationResult.Errors.Select(x => x.ErrorMessage));
+        var validationResult =
+          await _updateValidator.ValidateAsync(dto);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
+        var exists = await _context.Customers.AnyAsync(x =>
+                                                x.NationalCode == dto.NationalCode &&
+                                                x.Id != dto.Id);
 
-        //    throw new ValidationException(errors);
-        //}
         var customer = await _context.Customers
             .FirstOrDefaultAsync(x => x.Id == dto.Id);
 
@@ -154,7 +162,15 @@ public class CustomerService : ICustomerService
         customer.IsActive = dto.IsActive;
         customer.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new InvalidOperationException(
+                "اطلاعات این مشتری توسط کاربر دیگری تغییر کرده است. ابتدا اطلاعات جدید را دریافت کنید.");
+        }
     }
     public async Task DeleteAsync(int id)
     {

@@ -1,6 +1,7 @@
 ﻿using CRM.Application.DTOs.Customers;
 using CRM.Application.Interfaces;
 using CRM.Infrastructure.Services;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,6 +19,7 @@ namespace CRM.WinForms.Forms.Customers
         private readonly ICustomerService _customerService;
         private readonly ICompanyService _companyService;
         private readonly int? _customerId;
+        ErrorProvider Provider;
         public CustomerEditForm(ICustomerService customerService, ICompanyService companyService, int? customerId = null)
         {
             InitializeComponent();
@@ -81,18 +83,58 @@ namespace CRM.WinForms.Forms.Customers
 
                 DialogResult = DialogResult.OK;
             }
-            catch (Exception ex)
+            catch (ValidationException ex)
             {
-                MessageBox.Show(
-                    ex.Message,
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                Provider.Clear();
+
+                foreach (var error in ex.Errors)
+                {
+                    switch (error.PropertyName)
+                    {
+                        case nameof(CreateCustomerDto.FirstName):
+                        
+                            Provider.SetError(
+                                txtFirstName,
+                                error.ErrorMessage);
+                            break;
+
+                        case nameof(CreateCustomerDto.LastName):
+                       
+                            Provider.SetError(
+                                txtLastName,
+                                error.ErrorMessage);
+                            break;
+
+                        case nameof(CreateCustomerDto.Mobile):
+                        
+                            Provider.SetError(
+                                txtMobile,
+                                error.ErrorMessage);
+                            break;
+
+                        case nameof(CreateCustomerDto.Email):
+                        
+                            Provider.SetError(
+                                txtEmail,
+                                error.ErrorMessage);
+                            break;
+
+                        case nameof(CreateCustomerDto.NationalCode):
+                        
+                            Provider.SetError(
+                                txtNationalCode,
+                                error.ErrorMessage);
+                            break;
+                    }
+                }
             }
 
-            MessageBoxIcon.Error);
-        }
 
+        }
+        private void ClearValidationErrors()
+        {
+            Provider.Clear();
+        }
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;

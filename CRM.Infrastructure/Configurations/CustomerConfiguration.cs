@@ -41,5 +41,7 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
     .WithMany(x => x.Customers)
     .HasForeignKey(x => x.AssignedUserId)
     .OnDelete(DeleteBehavior.SetNull);
+        builder.Property(x => x.RowVersion)
+    .IsRowVersion();
     }
 }
