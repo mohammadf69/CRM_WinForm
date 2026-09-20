@@ -11,17 +11,18 @@ public class CreateCustomerValidator : AbstractValidator<CreateCustomerDto>
             .NotEmpty()
             .WithMessage("نام الزامی است.")
             .MaximumLength(100)
-            .WithMessage("نام نمی‌تواند بیشتر از 10 کاراکتر باشد.");
+            .WithMessage("نام نمی‌تواند بیشتر از 100 کاراکتر باشد.");
 
         RuleFor(x => x.LastName)
             .NotEmpty()
             .WithMessage("نام خانوادگی الزامی است.")
             .MaximumLength(100)
-            .WithMessage("نام خانوادگی نمی‌تواند بیشتر از 20 کاراکتر باشد.");
+            .WithMessage("نام خانوادگی نمی‌تواند بیشتر از 100 کاراکتر باشد.");
 
-        RuleFor(x => x.Mobile).MinimumLength(1)
+        RuleFor(x => x.Mobile)
             .MaximumLength(11)
-            .WithMessage("شماره موبایل نامعتبر است.");
+            .When(x => !string.IsNullOrWhiteSpace(x.Mobile))
+            .WithMessage("شماره موبایل نمی‌تواند بیشتر از 11 کاراکتر باشد.");
 
         RuleFor(x => x.Email)
             .EmailAddress()
@@ -30,7 +31,7 @@ public class CreateCustomerValidator : AbstractValidator<CreateCustomerDto>
 
         RuleFor(x => x.NationalCode)
             .Length(10)
-            .When(x => string.IsNullOrWhiteSpace(x.NationalCode))
+            .When(x => !string.IsNullOrWhiteSpace(x.NationalCode))
             .WithMessage("کد ملی باید 10 رقم باشد.");
 
     }

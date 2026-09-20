@@ -43,5 +43,12 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
     .OnDelete(DeleteBehavior.SetNull);
         builder.Property(x => x.RowVersion)
     .IsRowVersion();
+
+        // Unique business key: exclude NULLs so multiple customers without a
+        // national code are allowed (SQL Server treats NULL as equal in unique indexes).
+        builder.HasIndex(x => x.NationalCode)
+            .IsUnique()
+            .HasFilter("[NationalCode] IS NOT NULL")
+            .HasDatabaseName("IX_Customers_NationalCode_Unique");
     }
 }

@@ -10,13 +10,15 @@ public class UpdateCustomerValidator : AbstractValidator<UpdateCustomerDto>
     {
         RuleFor(x => x.FirstName)
             .NotEmpty()
+            .WithMessage("نام الزامی است.")
             .MaximumLength(100)
-            .WithMessage("نام الزامی است و حداکثر 10 کاراکتر است.");
+            .WithMessage("نام نمی‌تواند بیشتر از 100 کاراکتر باشد.");
 
         RuleFor(x => x.LastName)
             .NotEmpty()
+            .WithMessage("نام خانوادگی الزامی است.")
             .MaximumLength(100)
-            .WithMessage("نام خانوادگی الزامی است و حداکثر 20 کاراکتر است.");
+            .WithMessage("نام خانوادگی نمی‌تواند بیشتر از 100 کاراکتر باشد.");
 
         RuleFor(x => x.NationalCode)
             .Length(10)
@@ -24,12 +26,13 @@ public class UpdateCustomerValidator : AbstractValidator<UpdateCustomerDto>
             .WithMessage("کد ملی باید 10 رقم باشد.");
 
         RuleFor(x => x.Mobile)
-            .MaximumLength(20).MinimumLength(1)
+            .MaximumLength(11)
+            .When(x => !string.IsNullOrWhiteSpace(x.Mobile))
             .WithMessage("شماره موبایل نمی‌تواند بیشتر از 11 کاراکتر باشد.");
 
         RuleFor(x => x.Email)
             .EmailAddress()
-            .When(x => string.IsNullOrWhiteSpace(x.Email))
+            .When(x => !string.IsNullOrWhiteSpace(x.Email))
             .WithMessage("ایمیل معتبر نیست.");
     }
 }

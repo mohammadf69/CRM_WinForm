@@ -1,6 +1,5 @@
 ﻿using CRM.Application.DTOs.Customers;
 using CRM.Application.Interfaces;
-using CRM.Infrastructure.Services;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -19,10 +18,17 @@ namespace CRM.WinForms.Forms.Customers
         private readonly ICustomerService _customerService;
         private readonly ICompanyService _companyService;
         private readonly int? _customerId;
-        ErrorProvider Provider;
+        private readonly ErrorProvider Provider;
         public CustomerEditForm(ICustomerService customerService, ICompanyService companyService, int? customerId = null)
         {
             InitializeComponent();
+
+            // The designer does not always create a components container;
+            // ensure one exists so the ErrorProvider is disposed with the form.
+            components ??= new Container();
+
+            Provider = new ErrorProvider(components);
+
             _customerService = customerService;
             _customerId = customerId;
             _companyService = companyService;

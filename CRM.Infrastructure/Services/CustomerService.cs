@@ -73,12 +73,18 @@ public class CustomerService : ICustomerService
     }
     public async Task CreateAsync(CreateCustomerDto dto)
     {
-        var exists = await _context.Customers
-             .AnyAsync(x => x.NationalCode == dto.NationalCode);
+        // Only enforce uniqueness when a national code was actually provided;
+        // null/empty values are exempt (filtered unique index ignores NULLs too).
+        if (!string.IsNullOrWhiteSpace(dto.NationalCode))
+        {
+            var exists = await _context.Customers
+                 .AnyAsync(x => x.NationalCode == dto.NationalCode);
 
-        if (exists)
-            throw new ValidationException(
-                "این کد ملی قبلاً ثبت شده است.");
+            if (exists)
+                throw new ValidationException(
+                    "این کد ملی قبلاً ثبت شده است.");
+        }
+
         var validationResult =
             await _createValidator.ValidateAsync(dto);
 
@@ -102,7 +108,7 @@ public class CustomerService : ICustomerService
             Address = dto.Address,
             CompanyId = dto.CompanyId,
             AssignedUserId = dto.AssignedUserId,
-            IsActive = true,
+            IsActive = dto.IsActive,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -140,9 +146,18 @@ public class CustomerService : ICustomerService
         {
             throw new ValidationException(validationResult.Errors);
         }
-        var exists = await _context.Customers.AnyAsync(x =>
-                                                x.NationalCode == dto.NationalCode &&
-                                                x.Id != dto.Id);
+        // Uniqueness is only enforced when a national code was provided, and the
+        // current customer is excluded from the duplicate query.
+        if (!string.IsNullOrWhiteSpace(dto.NationalCode))
+        {
+            var exists = await _context.Customers.AnyAsync(x =>
+                                                    x.NationalCode == dto.NationalCode &&
+                                                    x.Id != dto.Id);
+
+            if (exists)
+                throw new ValidationException(
+                    "این کد ملی قبلاً ثبت شده است.");
+        }
 
         var customer = await _context.Customers
             .FirstOrDefaultAsync(x => x.Id == dto.Id);
