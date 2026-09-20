@@ -1,6 +1,7 @@
 ﻿using CRM.Application.DTOs.Customers;
 using CRM.Application.Interfaces;
 using CRM.Infrastructure.Data;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRM.Infrastructure.Services;
@@ -8,10 +9,11 @@ namespace CRM.Infrastructure.Services;
 public class CustomerService : ICustomerService
 {
     private readonly AppDbContext _context;
-
-    public CustomerService(AppDbContext context)
+    private readonly IValidator<CreateCustomerDto> _createValidator;
+    public CustomerService(AppDbContext context, IValidator<CreateCustomerDto> createValidator)
     {
         _context = context;
+        _createValidator =createValidator;
     }
 
     public async Task<List<CustomerListDto>> GetAllAsync()
@@ -69,6 +71,18 @@ public class CustomerService : ICustomerService
     }
     public async Task CreateAsync(CreateCustomerDto dto)
     {
+        var validationResult =
+            await _createValidator.ValidateAsync(dto);
+
+        if (!validationResult.IsValid)
+        {
+            var errors = string.Join(
+                Environment.NewLine,
+                validationResult.Errors.Select(x => x.ErrorMessage));
+
+            throw new ValidationException(errors);
+        }
+
         var customer = new Customer
         {
             FirstName = dto.FirstName,
@@ -112,6 +126,16 @@ public class CustomerService : ICustomerService
     }
     public async Task UpdateAsync(UpdateCustomerDto dto)
     {
+        //var validationResult =
+        //    await _createValidator.ValidateAsync(dto);
+        //if (!validationResult.IsValid)
+        //{
+        //    var errors = string.Join(
+        //        Environment.NewLine,
+        //        validationResult.Errors.Select(x => x.ErrorMessage));
+
+        //    throw new ValidationException(errors);
+        //}
         var customer = await _context.Customers
             .FirstOrDefaultAsync(x => x.Id == dto.Id);
 

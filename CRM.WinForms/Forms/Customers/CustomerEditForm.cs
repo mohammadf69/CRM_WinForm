@@ -16,92 +16,81 @@ namespace CRM.WinForms.Forms.Customers
     public partial class CustomerEditForm : Form
     {
         private readonly ICustomerService _customerService;
+        private readonly ICompanyService _companyService;
         private readonly int? _customerId;
-        public CustomerEditForm(ICustomerService customerService, int? customerId = null)
+        public CustomerEditForm(ICustomerService customerService, ICompanyService companyService, int? customerId = null)
         {
             InitializeComponent();
             _customerService = customerService;
             _customerId = customerId;
+            _companyService = companyService;
         }
-        private string CheckIFnullValeu()
-        {
-            string messageForNUll = "";
-            if (string.IsNullOrWhiteSpace(txtFirstName.Text))
-            {
-                messageForNUll = "  نام را وارد کنید/n";
-            }
-            if (string.IsNullOrWhiteSpace(txtLastName.Text))
-            {
-                messageForNUll += "  نام خانوادگی را وارد کنید/n";
-            }
-            if (string.IsNullOrWhiteSpace(txtMobile.Text))
-            {
-                messageForNUll += "  موبایل  را وارد کنید/n";
-            }
-            if (string.IsNullOrWhiteSpace(txtPhone.Text))
-            {
-                messageForNUll += "  تلفن  را وارد کنید/n";
-            }
-            if (string.IsNullOrWhiteSpace(txtAddress.Text))
-            {
-                messageForNUll += "  آدرس را وارد کنید/n";
-            }
 
-            return messageForNUll;
-        }
 
         private async void btnSave_Click(object sender, EventArgs e)
         {
-            if (CheckIFnullValeu() == "")
+            try
             {
-                try
+                if (_customerId is null)
                 {
-                    if (_customerId is null)
+                    var dto = new CreateCustomerDto
                     {
-                        var dto = new CreateCustomerDto
-                        {
-                            FirstName = txtFirstName.Text.Trim(),
-                            LastName = txtLastName.Text.Trim(),
-                            NationalCode = txtNationalCode.Text.Trim(),
-                            Mobile = txtMobile.Text.Trim(),
-                            Phone = txtPhone.Text.Trim(),
-                            Email = txtEmail.Text.Trim(),
-                            Address = txtAddress.Text.Trim(),
-                            IsActive = true
-                        };
+                        FirstName = txtFirstName.Text.Trim(),
+                        LastName = txtLastName.Text.Trim(),
+                        NationalCode = txtNationalCode.Text.Trim(),
+                        Mobile = txtMobile.Text.Trim(),
+                        Phone = txtPhone.Text.Trim(),
+                        Email = txtEmail.Text.Trim(),
+                        Address = txtAddress.Text.Trim(),
+                        IsActive = true,
+                        CompanyId = cmbCompany.SelectedValue as int?
+                    };
 
-                        await _customerService.CreateAsync(dto);
-                    }
-                    else
-                    {
-                        var dto = new UpdateCustomerDto
-                        {
-                            Id = _customerId.Value,
-                            FirstName = txtFirstName.Text.Trim(),
-                            LastName = txtLastName.Text.Trim(),
-                            NationalCode = txtNationalCode.Text.Trim(),
-                            Mobile = txtMobile.Text.Trim(),
-                            Phone = txtPhone.Text.Trim(),
-                            Email = txtEmail.Text.Trim(),
-                            Address = txtAddress.Text.Trim(),
-                            IsActive = chkIsActive.Checked
-                        };
 
-                        await _customerService.UpdateAsync(dto);
-                    }
 
-                    DialogResult = DialogResult.OK;
-                }
-                catch (Exception ex)
-                {
+                    await _customerService.CreateAsync(dto);
                     MessageBox.Show(
-                        ex.Message,
-                        "Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
+                  "مشتری جدید ثبت شد",
+                  "success",
+                  MessageBoxButtons.OK,
+                  MessageBoxIcon.Information);
+                }
+                else
+                {
+                    var dto = new UpdateCustomerDto
+                    {
+                        Id = _customerId.Value,
+                        FirstName = txtFirstName.Text.Trim(),
+                        LastName = txtLastName.Text.Trim(),
+                        NationalCode = txtNationalCode.Text.Trim(),
+                        Mobile = txtMobile.Text.Trim(),
+                        Phone = txtPhone.Text.Trim(),
+                        Email = txtEmail.Text.Trim(),
+                        Address = txtAddress.Text.Trim(),
+                        IsActive = chkIsActive.Checked,
+                        CompanyId = cmbCompany.SelectedValue as int?
+                    };
+
+                    await _customerService.UpdateAsync(dto);
+                    MessageBox.Show(
+                                    "ویرایش مشتری با موفقیت انجام شد",
+                                    "success",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information);
                 }
 
+                DialogResult = DialogResult.OK;
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+
+            MessageBoxIcon.Error);
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -111,6 +100,7 @@ namespace CRM.WinForms.Forms.Customers
 
         private async void CustomerEditForm_Load(object sender, EventArgs e)
         {
+            await LoadCompaniesAsync();
             if (_customerId is null)
                 return;
 
@@ -132,6 +122,17 @@ namespace CRM.WinForms.Forms.Customers
             txtEmail.Text = customer.Email;
             txtAddress.Text = customer.Address;
             chkIsActive.Checked = customer.IsActive;
+        }
+        private async Task LoadCompaniesAsync()
+        {
+            var companies = await _companyService.GetAllAsync();
+
+            cmbCompany.DataSource = companies;
+
+            cmbCompany.DisplayMember = "Name";
+            cmbCompany.ValueMember = "Id";
+
+            cmbCompany.SelectedIndex = -1;
         }
     }
 }

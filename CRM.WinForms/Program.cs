@@ -1,7 +1,9 @@
 using CRM.Application.Interfaces;
+using CRM.Application.Validators.Customers;
 using CRM.Infrastructure.Data;
 using CRM.Infrastructure.Services;
 using CRM.WinForms.Forms.Customers;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +38,8 @@ internal static class Program
         builder.Services.AddTransient<CustomerListForm>();
         builder.Services.AddTransient<CustomerEditForm>();
         builder.Services.AddTransient<Form1>();
+        builder.Services.AddScoped<ICompanyService, CompanyService>();
+        builder.Services.AddValidatorsFromAssemblyContaining<CreateCustomerValidator>();
 
         using var host = builder.Build();
 
