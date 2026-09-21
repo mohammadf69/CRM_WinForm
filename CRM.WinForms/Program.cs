@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace CRM.WinForms;
 
@@ -17,13 +16,18 @@ internal static class Program
     [STAThread]
     static void Main()
     {
-       
-
         var builder = Host.CreateApplicationBuilder();
 
         builder.Configuration.AddJsonFile(
             "appsettings.json",
             optional: false,
+            reloadOnChange: true);
+
+        // Developer-local, untracked overrides (may contain the local
+        // connection string with credentials). See .gitignore.
+        builder.Configuration.AddJsonFile(
+            "appsettings.Development.json",
+            optional: true,
             reloadOnChange: true);
 
         var connectionString =
@@ -35,11 +39,17 @@ internal static class Program
             options.UseSqlServer(connectionString));
 
         builder.Services.AddScoped<ICustomerService, CustomerService>();
-        builder.Services.AddTransient<CustomerListForm>();
-        builder.Services.AddTransient<CustomerEditForm>();
-        builder.Services.AddTransient<Form1>();
         builder.Services.AddScoped<ICompanyService, CompanyService>();
         builder.Services.AddValidatorsFromAssemblyContaining<CreateCustomerValidator>();
+
+        builder.Services.AddTransient<CustomerListForm>();
+        builder.Services.AddTransient<Form1>();
+
+        // Forms receive factories/delegates instead of the service container,
+        // so no form resolves its own dependencies at runtime.
+        builder.Services.AddTransient<ICustomerEditFormFactory, CustomerEditFormFactory>();
+        builder.Services.AddTransient<Func<CustomerListForm>>(serviceProvider =>
+            () => serviceProvider.GetRequiredService<CustomerListForm>());
 
         using var host = builder.Build();
 

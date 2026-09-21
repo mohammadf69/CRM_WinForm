@@ -14,14 +14,14 @@ public class TaskItem
 
     public TaskPriority Priority { get; set; }
 
-    public TaskStatus Status { get; set; }
+    public CrmTaskStatus Status { get; set; }
 
     public Customer? Customer { get; set; }
     public int? AssignedUserId { get; set; }
 
     public User? AssignedUser { get; set; }
 }
-public enum TaskStatus : byte
+public enum CrmTaskStatus : byte
 {
     Open = 1,
     InProgress = 2,

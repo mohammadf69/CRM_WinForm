@@ -1,29 +1,22 @@
-﻿using CRM.Application.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using CRM.Application.Interfaces;
 
 namespace CRM.WinForms.Forms.Customers
 {
     public partial class CustomerListForm : Form
     {
         private readonly ICustomerService _customerService;
-        private readonly IServiceProvider _serviceProvider;
-        private int customerId;
-        public CustomerListForm(ICustomerService customerService, IServiceProvider serviceProvider)
+        private readonly ICustomerEditFormFactory _editFormFactory;
+
+        public CustomerListForm(
+            ICustomerService customerService,
+            ICustomerEditFormFactory editFormFactory)
         {
             InitializeComponent();
 
             _customerService = customerService;
-            _serviceProvider = serviceProvider;
+            _editFormFactory = editFormFactory;
         }
+
         private async Task LoadCustomersAsync()
         {
             try
@@ -42,9 +35,9 @@ namespace CRM.WinForms.Forms.Customers
             }
         }
 
-        private void CustomerListForm_Load(object sender, EventArgs e)
+        private async void CustomerListForm_Load(object sender, EventArgs e)
         {
-            LoadCustomersAsync();
+            await LoadCustomersAsync();
         }
 
         private async void btnSearch_Click(object sender, EventArgs e)
@@ -75,7 +68,7 @@ namespace CRM.WinForms.Forms.Customers
 
         private async void btnNew_Click(object sender, EventArgs e)
         {
-            using var form = ActivatorUtilities.CreateInstance<CustomerEditForm>(_serviceProvider);
+            using var form = _editFormFactory.Create();
 
             if (form.ShowDialog(this) == DialogResult.OK)
             {
@@ -83,18 +76,20 @@ namespace CRM.WinForms.Forms.Customers
             }
         }
 
-        private void btnEdit_Click(object sender, EventArgs e)
+        private async void btnEdit_Click(object sender, EventArgs e)
         {
             if (dgvCustomers.Rows.Count > 0)
             {
-                customerId = (int)dgvCustomers.CurrentRow.Cells["Id"].Value;
-                using var form =
-                    ActivatorUtilities.CreateInstance<CustomerEditForm>(
-                        _serviceProvider,
-                        customerId);
-                form.ShowDialog(this);
-            }
+                var customerId =
+                    (int)dgvCustomers.CurrentRow.Cells["Id"].Value;
 
+                using var form = _editFormFactory.Create(customerId);
+
+                if (form.ShowDialog(this) == DialogResult.OK)
+                {
+                    await LoadCustomersAsync();
+                }
+            }
         }
 
         private void dgvCustomers_CellEnter(object sender, DataGridViewCellEventArgs e)
